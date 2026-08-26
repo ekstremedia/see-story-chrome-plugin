@@ -33,13 +33,31 @@ The badge on the icon briefly shows how many elements were removed (green), or
 
 ## Install
 
-Not on the Chrome Web Store — load it unpacked:
+### 1. Download
 
-1. Clone or download this repo.
-2. Open `chrome://extensions`.
-3. Turn on **Developer mode** (top right).
-4. **Load unpacked** → pick this folder.
-5. Pin the icon, open an article, click.
+**[⬇ Download see-story-1.0.0.zip](https://github.com/ekstremedia/see-story-chrome-plugin/releases/download/v1.0.0/see-story-1.0.0.zip)**
+
+Then **unzip it**, and keep the folder somewhere you will not delete it — Chrome
+loads the extension from that folder every time it starts, so moving or deleting
+the folder removes the extension.
+
+Every version is listed on the
+[releases page](https://github.com/ekstremedia/see-story-chrome-plugin/releases).
+
+### 2. Load it into Chrome
+
+It is not on the Chrome Web Store, so Chrome has to be told to load it from your
+own disk:
+
+1. Open a new tab and go to `chrome://extensions`.
+2. Turn on **Developer mode** — the switch in the top right corner.
+3. Click **Load unpacked**, and pick the folder you unzipped.
+4. Click the puzzle-piece icon in the toolbar, then the pin next to **See Story**,
+   so the icon stays visible.
+
+Open an article and click the icon. Chrome warns about developer-mode extensions
+every time it starts; that warning is about unpacked extensions in general, not
+about this one.
 
 Keyboard shortcut: <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> (rebind at
 `chrome://extensions/shortcuts`).
