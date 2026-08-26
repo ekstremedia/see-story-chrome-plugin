@@ -7,6 +7,12 @@ underneath — with one click.
 It does by hand what you would otherwise do in DevTools every single time:
 delete one `<div>`, untick one CSS property.
 
+![Before and after: on the left an article with a dialog over it and the text
+blurred out, on the right the same article with the dialog gone and both the
+photo and the text readable.](img/illustrasjon.jpeg)
+
+<p align="center"><em>Left: a dialog over blurred text. Right: after one click.</em></p>
+
 ---
 
 ## What it does
