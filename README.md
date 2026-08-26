@@ -1,11 +1,11 @@
 # Clear View
 
 A small Chrome extension that makes an unreadable page readable again — with one
-click. It strips CSS blur, gradient fade-outs and scroll locks from whatever tab
-you are on, and can hide elements you name yourself, per site.
+click. It strips CSS blur, gradient fade-outs and scroll locks from the `http`
+or `https` page you are on, and can hide elements you name yourself, per site.
 
-Nothing runs until you click the icon. No host permissions, no background
-activity, no data collected.
+Nothing runs until you invoke it. No host permissions, no background activity,
+no data collected.
 
 ---
 
@@ -13,7 +13,7 @@ activity, no data collected.
 
 | Step | Detail | Default |
 |------|--------|---------|
-| Remove blur | Clears `filter: blur()` and `backdrop-filter` from every element. | on |
+| Remove blur | Clears `filter: blur()` and `backdrop-filter` from every element, up to the first 20 000 inspected. | on |
 | Remove fade-out masks | Clears gradient `mask-image` — the trick that fades text out at the bottom of a clamped block. | on |
 | Unlock scrolling | Restores `overflow` on `<html>` and `<body>` when something pinned them to `hidden`. | on |
 | Per-site rules | Hides selectors you listed for this host, and injects your extra CSS. | none |
@@ -72,8 +72,13 @@ Hide:      #reading-overlay
 
 That is the whole list, and there is no `host_permissions`, so the extension has
 **no** standing access to any site. `activeTab` grants one tab, only at the
-moment you click the icon, and it expires on navigation. `storage` holds your own
-rules. Nothing is sent anywhere — see [PRIVACY.md](PRIVACY.md).
+moment you invoke the extension — by clicking the icon or pressing the keyboard
+shortcut, which does the same thing — and it expires on navigation.
+
+`storage` holds your own rules. Nothing is sent to the author or to any server;
+the extension has none. Chrome itself syncs `chrome.storage.sync` across your
+own Chrome profile through Google if you have Chrome Sync turned on. See
+[PRIVACY.md](PRIVACY.md).
 
 ## Files
 

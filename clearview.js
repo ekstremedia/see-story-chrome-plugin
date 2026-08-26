@@ -40,7 +40,7 @@
 
   const ruleSelectors = activeRules.flatMap((r) =>
     (r.hide || "")
-      .split(/[\n,]/)
+      .split("\n")
       .map((s) => s.trim())
       .filter(Boolean),
   );
@@ -92,7 +92,13 @@
 
   const sweep = () => {
     for (const sel of ruleSelectors) {
-      for (const el of document.querySelectorAll(sel)) {
+      let matches;
+      try {
+        matches = document.querySelectorAll(sel);
+      } catch {
+        continue; // the user typed something querySelectorAll won't parse
+      }
+      for (const el of matches) {
         el.remove();
         changed++;
       }
@@ -145,11 +151,20 @@
   const watchMs = Math.max(0, Number(settings.watchSeconds) || 0) * 1000;
   if (watchMs) {
     if (!window.__clearViewObserver) {
-      const observer = new MutationObserver(() => {
+      const observer = new MutationObserver((mutations) => {
+        // A restyled element has to be looked at again, so drop it from `seen`.
+        for (const m of mutations) {
+          if (m.type === "attributes" && !m.target.hasAttribute(MARK)) seen.delete(m.target);
+        }
         injectStyle();
         sweep();
       });
-      observer.observe(document.documentElement, { childList: true, subtree: true });
+      observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["class", "style"],
+      });
       window.__clearViewObserver = observer;
     }
     // Each click gets a full window.

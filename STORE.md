@@ -59,10 +59,11 @@ settings for 30 seconds after the click, then stops. The badge shows how many
 elements it changed.
 
 Privacy: the extension has no host permissions, so it has no standing access to
-any website. Chrome grants it one tab, at the moment you click the icon, and
-that access ends when you navigate away. It makes no network requests, has no
-server, and collects nothing. Your rules are kept in Chrome's own synced
-storage.
+any website. Chrome grants it one tab, at the moment you click the icon or press
+the shortcut, and that access ends when you navigate away. It makes no network
+requests, has no server, and collects nothing. Your settings are kept in
+Chrome's own storage, which Chrome syncs across your profile if you have Chrome
+Sync on.
 
 Open source, MIT licensed:
 https://github.com/ekstremedia/see-story-chrome-plugin
@@ -102,7 +103,7 @@ elements the user has listed in their own per-site rules.
 
 | Permission | Justification |
 |---|---|
-| `activeTab` | The extension needs access to the tab the user clicked the toolbar icon on, in order to change how that page renders. activeTab limits this to that single tab, at that moment, and the access expires on navigation. No other access is requested. |
+| `activeTab` | The extension needs access to the tab the user invoked it on — by clicking the toolbar icon or pressing the keyboard shortcut, both of which fire the same action — in order to change how that page renders. activeTab limits this to that single tab, at that moment, and the access expires on navigation. No other access is requested. |
 | `scripting` | Required to inject the script that applies the user's settings into the page. It is injected only in response to the user clicking the toolbar icon. |
 | `storage` | Stores the user's own settings — three toggles, a duration, and any per-site rules they wrote. Nothing else is stored, and it never leaves the browser. |
 

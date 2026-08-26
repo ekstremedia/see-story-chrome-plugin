@@ -29,19 +29,38 @@ export $(systemctl --user show-environment | grep -E '^(WAYLAND_DISPLAY|SWAYSOCK
   "chrome://extensions" >/dev/null 2>&1 &
 chrome_pid=$!
 
+cleanup() {
+  kill "$chrome_pid" 2>/dev/null || true
+  rm -rf "$profile"
+}
+trap cleanup EXIT
+trap 'exit 130' HUP INT TERM
+
 echo "Chrome up with the extension loaded."
 echo "Set up the shot (options page, or a page before/after a click), then press Enter."
 read -r
 
+# Find the Chrome window itself - after pressing Enter the terminal is focused.
 geometry="$(swaymsg -t get_tree | python3 -c '
 import json, sys
+
+def is_chrome(n):
+    app = (n.get("app_id") or "").lower()
+    cls = ((n.get("window_properties") or {}).get("class") or "").lower()
+    return any(k in app or k in cls for k in ("chrome", "chromium"))
+
 def walk(n):
-    if n.get("focused"):
-        r = n["rect"]
-        print(f"{r[\"x\"]},{r[\"y\"]} {r[\"width\"]}x{r[\"height\"]}")
-        return True
-    return any(walk(c) for c in n.get("nodes", []) + n.get("floating_nodes", []))
-walk(json.load(sys.stdin))
+    for c in n.get("nodes", []) + n.get("floating_nodes", []):
+        found = walk(c)
+        if found:
+            return found
+    return n if is_chrome(n) and n.get("rect") else None
+
+win = walk(json.load(sys.stdin))
+if not win:
+    sys.exit("no Chrome window found in the sway tree")
+r = win["rect"]
+print(f'{r["x"]},{r["y"]} {r["width"]}x{r["height"]}')
 ')"
 
 grim -g "$geometry" "$dir/$name.png"
@@ -59,6 +78,3 @@ if img.size != (1280, 800):
     img.save(p)
 print(p, img.size)
 PY
-
-kill "$chrome_pid" 2>/dev/null || true
-rm -rf "$profile"

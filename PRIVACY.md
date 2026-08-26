@@ -6,13 +6,15 @@ Effective 2026-08-26.
 
 ## What the extension can see
 
-When you click the toolbar icon, Chrome grants the extension temporary access to
-that one tab (the `activeTab` permission) so it can change how the page is
+When you invoke the extension — by clicking the toolbar icon or pressing its
+keyboard shortcut, which are the same action — Chrome grants it temporary access
+to that one tab (the `activeTab` permission) so it can change how the page is
 rendered. That access ends when you navigate away. The extension holds no
 `host_permissions`, so it has no standing access to any website and cannot read
 any page you have not clicked it on.
 
-The page content it touches is never read out, copied, stored or sent anywhere.
+The page content it touches is never read out, copied, stored, or sent to the
+author or to anyone else.
 There is no analytics, no telemetry, no crash reporting, no remote code and no
 network request of any kind. The extension has no server.
 

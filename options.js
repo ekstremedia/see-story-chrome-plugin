@@ -95,6 +95,19 @@ $("file").addEventListener("change", async (event) => {
   try {
     const data = JSON.parse(await file.text());
     if (!Array.isArray(data.rules)) throw new Error("no rules array");
+    // A malformed rule breaks both this page and the injected script, so
+    // check every entry before anything is written.
+    data.rules.forEach((rule, i) => {
+      if (!rule || typeof rule !== "object") throw new Error(`rule ${i + 1} is not an object`);
+      for (const field of ["name", "match", "hide", "css"]) {
+        if (rule[field] !== undefined && typeof rule[field] !== "string") {
+          throw new Error(`rule ${i + 1}: ${field} is not text`);
+        }
+      }
+      if (rule.enabled !== undefined && typeof rule.enabled !== "boolean") {
+        throw new Error(`rule ${i + 1}: enabled is not true or false`);
+      }
+    });
     await chrome.storage.sync.set({ ...DEFAULTS, ...data });
     await load();
     say("Imported.");
