@@ -1,88 +1,99 @@
-# See Story
+# Clear View
 
-A tiny Chrome extension that removes the reading overlay Amedia newspaper sites
-(`blv.no`, `an.no`, `rb.no`, …) draw over an article, and un-blurs the text
-underneath — with one click.
+A small Chrome extension that makes an unreadable page readable again — with one
+click. It strips CSS blur, gradient fade-outs and scroll locks from whatever tab
+you are on, and can hide elements you name yourself, per site.
 
-It does by hand what you would otherwise do in DevTools every single time:
-delete one `<div>`, untick one CSS property.
+Nothing runs until you click the icon. No host permissions, no background
+activity, no data collected.
 
 ---
 
-## What it does
+## What a click does
 
-Clicking the toolbar icon runs three steps on the active tab:
+| Step | Detail | Default |
+|------|--------|---------|
+| Remove blur | Clears `filter: blur()` and `backdrop-filter` from every element. | on |
+| Remove fade-out masks | Clears gradient `mask-image` — the trick that fades text out at the bottom of a clamped block. | on |
+| Unlock scrolling | Restores `overflow` on `<html>` and `<body>` when something pinned them to `hidden`. | on |
+| Per-site rules | Hides selectors you listed for this host, and injects your extra CSS. | none |
 
-| # | Step | Detail |
-|---|------|--------|
-| 1 | Remove the overlay | Deletes `#aid-overlay` and the `amedia-yokohama-incentive`, `amedia-yokohama-paywall` and `article-incentive` elements inside it. |
-| 2 | Un-blur the article | The site's `story.css` sets `.aid-background-blur { filter: blur(5px) }`. The extension injects `filter: none !important` and also clears any inline `filter` on those elements. |
-| 3 | Unlock scrolling | Restores `overflow` on `<html>` and `<body>`, which the overlay pins to `hidden`. |
+Pages re-render after loading, so a `MutationObserver` re-applies everything for
+30 seconds after the click (configurable, 0 turns it off). The badge shows how
+many elements were changed.
 
-The page re-renders the overlay after hydration, so a `MutationObserver` keeps
-re-applying all three for **30 seconds** after the click, then disconnects.
-
-The badge on the icon briefly shows how many elements were removed (green), or
-`!` if the script could not run on that page (red).
+Keyboard shortcut: <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>, rebindable at
+`chrome://extensions/shortcuts`.
 
 ## Install
 
-Not on the Chrome Web Store — load it unpacked:
+Not on the Chrome Web Store yet — load it unpacked:
 
 1. Clone or download this repo.
 2. Open `chrome://extensions`.
 3. Turn on **Developer mode** (top right).
 4. **Load unpacked** → pick this folder.
-5. Pin the icon, open an article, click.
+5. Pin the icon, open a page, click.
 
-Keyboard shortcut: <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> (rebind at
-`chrome://extensions/shortcuts`).
+## Rules
+
+Options page → **Add rule**. A rule has four fields:
+
+| Field | Meaning |
+|-------|---------|
+| Hosts | Comma separated. `example.com`, `*.example.com`, or `*` for every site. |
+| Hide these selectors | One per line. Matching elements are removed from the DOM. |
+| Extra CSS | Injected as-is. Good for `max-height: none !important` and similar. |
+| Enabled | Off keeps the rule around without applying it. |
+
+Find a selector with right-click → **Inspect**, then right-click the node in
+DevTools → **Copy** → **Copy selector**.
+
+Rules live in `chrome.storage.sync`, so they follow your Chrome profile. Export
+and Import move them as JSON. Sync caps one item at 8 KB, which is a few hundred
+selectors.
+
+### Example: a reading overlay
+
+Site draws a full-page `<div id="reading-overlay">` over the article and blurs
+the text underneath. The blur is handled by the built-in toggle; the overlay
+needs a rule:
+
+```
+Hosts:     *.example.com
+Hide:      #reading-overlay
+```
 
 ## Permissions
 
 ```json
-"permissions": ["scripting", "activeTab"]
+"permissions": ["scripting", "activeTab", "storage"]
 ```
 
-That is the whole list. No `host_permissions`, so the extension has **no**
-standing access to any site: `activeTab` grants access to one tab when you
-click the icon or press the keyboard shortcut, persists across same-origin
-navigation, and is revoked when the tab closes or navigates to a different
-origin. Nothing runs in the background, nothing is stored, nothing leaves your
-browser.
+That is the whole list, and there is no `host_permissions`, so the extension has
+**no** standing access to any site. `activeTab` grants one tab, only at the
+moment you click the icon, and it expires on navigation. `storage` holds your own
+rules. Nothing is sent anywhere — see [PRIVACY.md](PRIVACY.md).
 
 ## Files
 
 ```
-manifest.json   Manifest V3
-background.js   Toolbar click → inject the script into all frames, set the badge
-seestory.js     The three steps above
-icons/          16 / 32 / 48 / 128 px
-make_icons.py   Regenerates the icons (needs Pillow)
+manifest.json      Manifest V3
+background.js      Toolbar click -> inject into all frames -> set the badge
+clearview.js       The passes above; runs in the page, reads your settings
+options.html/.js/.css   Rule editor
+icons/             16 / 32 / 48 / 128 + a 512 master
+make_icons.py      Regenerates icons/ (needs Pillow)
+make_store_zip.py  Builds the Chrome Web Store upload package
+STORE.md           Store listing copy and submission checklist
 ```
 
-The icon is the idea in one picture: four lines of article text, blurred on the
-left, sharp on the right.
+## Build the store package
 
-## Adapting it to another site
-
-Both lists live at the top of `seestory.js`:
-
-```js
-const KILL = ["#aid-overlay", "amedia-yokohama-incentive", /* … */];
-const BLUR = ".aid-background-blur";
+```bash
+python3 make_store_zip.py     # -> dist/clear-view-<version>.zip
 ```
-
-Add your selectors there. Everything else is generic.
-
-## Note
-
-This only changes how a page already loaded into *your* browser is rendered —
-the same edit you can make in DevTools. It does not fetch, unlock or download
-anything you were not already served, so on a hard paywall (where the body text
-is never sent to the browser) there is simply nothing underneath to reveal.
-Local journalism is worth paying for; if a site is useful to you, subscribe.
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).

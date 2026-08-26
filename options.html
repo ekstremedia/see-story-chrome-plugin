@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Clear View - options</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <header>
+      <img src="icons/icon48.png" alt="" width="40" height="40" />
+      <div>
+        <h1>Clear View</h1>
+        <p class="sub">Click the toolbar icon to clear the page you are on. Nothing runs until you do.</p>
+      </div>
+    </header>
+
+    <section>
+      <h2>What a click does</h2>
+      <label class="row"><input type="checkbox" id="unblur" /><span><strong>Remove CSS blur</strong><em>Clears <code>filter: blur()</code> and <code>backdrop-filter</code> from every element.</em></span></label>
+      <label class="row"><input type="checkbox" id="unfade" /><span><strong>Remove fade-out masks</strong><em>Clears gradient <code>mask-image</code>, the trick that fades text out at the bottom.</em></span></label>
+      <label class="row"><input type="checkbox" id="unlockScroll" /><span><strong>Unlock scrolling</strong><em>Restores <code>overflow</code> on <code>&lt;html&gt;</code> and <code>&lt;body&gt;</code>.</em></span></label>
+      <label class="row"><input type="number" id="watchSeconds" min="0" max="300" step="5" /><span><strong>Keep re-applying for N seconds</strong><em>Pages re-render after loading. 0 turns the watcher off.</em></span></label>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Per-site rules</h2>
+        <button id="add" class="primary">Add rule</button>
+      </div>
+      <p class="sub">
+        Optional. A rule hides elements you name, on the hosts you name. Find a selector with
+        right-click &rarr; Inspect in DevTools.
+      </p>
+      <div id="rules"></div>
+      <p class="empty" id="empty">No rules yet. The three options above already work everywhere without one.</p>
+    </section>
+
+    <footer>
+      <button id="save" class="primary">Save</button>
+      <button id="export">Export JSON</button>
+      <button id="import">Import JSON</button>
+      <input type="file" id="file" accept="application/json,.json" hidden />
+      <span id="status" role="status"></span>
+    </footer>
+
+    <template id="rule-template">
+      <div class="rule">
+        <div class="rule-head">
+          <label class="enabled"><input type="checkbox" data-field="enabled" /> Enabled</label>
+          <input type="text" data-field="name" placeholder="Rule name" class="name" />
+          <button data-action="delete" class="danger" title="Delete rule">Delete</button>
+        </div>
+        <label>Hosts <span class="hint">comma separated, <code>example.com</code> or <code>*.example.com</code> or <code>*</code></span>
+          <input type="text" data-field="match" placeholder="*.example.com" />
+        </label>
+        <label>Hide these selectors <span class="hint">one per line</span>
+          <textarea data-field="hide" rows="3" placeholder="#some-overlay&#10;.modal-backdrop"></textarea>
+        </label>
+        <label>Extra CSS <span class="hint">optional, injected as-is</span>
+          <textarea data-field="css" rows="2" placeholder=".clamped { max-height: none !important; }"></textarea>
+        </label>
+      </div>
+    </template>
+
+    <script src="options.js"></script>
+  </body>
+</html>
