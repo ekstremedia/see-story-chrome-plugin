@@ -7,6 +7,12 @@ or `https` page you are on, and can hide elements you name yourself, per site.
 Nothing runs until you invoke it. No host permissions, no background activity,
 no data collected.
 
+![Before and after: on the left an article with a dialog over it and the text
+blurred out, on the right the same article with the dialog gone and both the
+photo and the text readable.](img/illustrasjon.jpeg)
+
+<p align="center"><em>Left: a dialog over blurred text. Right: after one click.</em></p>
+
 ---
 
 ## What a click does
