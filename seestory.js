@@ -63,12 +63,19 @@
     });
     observer.observe(document.documentElement, { childList: true, subtree: true });
     window.__seeStoryObserver = observer;
-    // Stop after a while; no point observing forever.
-    setTimeout(() => {
-      observer.disconnect();
-      window.__seeStoryObserver = null;
-    }, 30000);
   }
+  // Stop after a while; no point observing forever.
+  // Clear any previous timeout so each execution gets a full 30-second window.
+  if (window.__seeStoryObserverTimeout) {
+    clearTimeout(window.__seeStoryObserverTimeout);
+  }
+  window.__seeStoryObserverTimeout = setTimeout(() => {
+    if (window.__seeStoryObserver) {
+      window.__seeStoryObserver.disconnect();
+      window.__seeStoryObserver = null;
+    }
+    window.__seeStoryObserverTimeout = null;
+  }, 30000);
 
   return { removed };
 })();

@@ -45,9 +45,11 @@ Keyboard shortcut: <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> (rebind at
 ```
 
 That is the whole list. No `host_permissions`, so the extension has **no**
-standing access to any site: `activeTab` grants access to one tab, only at the
-moment you click the icon, and it expires on navigation. Nothing runs in the
-background, nothing is stored, nothing leaves your browser.
+standing access to any site: `activeTab` grants access to one tab when you
+click the icon or press the keyboard shortcut, persists across same-origin
+navigation, and is revoked when the tab closes or navigates to a different
+origin. Nothing runs in the background, nothing is stored, nothing leaves your
+browser.
 
 ## Files
 
