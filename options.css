@@ -310,6 +310,8 @@ footer {
 
 @media (max-width: 560px) {
   .masthead { padding: 26px 18px 34px; }
-  main, footer { padding: 0 18px; }
+  /* Not a shared shorthand: footer has vertical padding of its own to keep. */
+  main { padding: 0 18px; }
+  footer { padding: 4px 18px 48px; }
   .rule-head { flex-wrap: wrap; }
 }
