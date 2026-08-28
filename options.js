@@ -83,7 +83,7 @@ $("export").addEventListener("click", async () => {
   );
   const a = document.createElement("a");
   a.href = url;
-  a.download = "clear-view-settings.json";
+  a.download = "amediaid-settings.json";
   a.click();
   URL.revokeObjectURL(url);
 });

@@ -39,11 +39,19 @@ chrome.runtime.onMessage.addListener((message, sender) => {
   pendingBadges.set(tabId, entry);
 });
 
-/** (Re)registers or unregisters the auto-run Amedia content script to match
- * the autoAmedia setting. The host permission itself is static (manifest.json
- * host_permissions) and always granted - this only controls whether the
- * script actually runs on those sites. */
-async function syncAmediaContentScript() {
+// (Re)registers or unregisters the auto-run Amedia content script to match the
+// autoAmedia setting. The host permission itself is static (manifest.json
+// host_permissions) and always granted - this only controls whether the
+// script actually runs on those sites.
+//
+// Queued through amediaSync rather than called directly: onInstalled,
+// onStartup and onChanged can all fire close together, and two overlapping
+// calls could each read a stale autoAmedia value and leave the registration
+// out of sync with the setting.
+let amediaSync = Promise.resolve();
+const syncAmediaContentScript = () => (amediaSync = amediaSync.catch(() => {}).then(syncAmediaContentScriptNow));
+
+async function syncAmediaContentScriptNow() {
   const { host_permissions: origins = [] } = chrome.runtime.getManifest();
   if (!origins.length) return;
   const { autoAmedia = true } = await chrome.storage.sync.get({ autoAmedia: true });

@@ -1,14 +1,17 @@
 /*
- * Clear View - injected on toolbar click.
+ * AmediAid - auto-registered on Amedia sites, and injected on toolbar click
+ * everywhere else.
  *
- * Three generic passes (CSS blur, fade-out masks, scroll locks) plus whatever
- * per-site rules the user has written in the options page.
+ * Hides the Amedia paywall box, plus three generic passes (CSS blur,
+ * fade-out masks, scroll locks) and whatever per-site rules the user has
+ * written in the options page.
  */
 (async () => {
   const DEFAULTS = {
     unblur: true,
     unfade: true,
     unlockScroll: true,
+    autoAmedia: true,
     watchSeconds: 30,
     rules: [],
   };
@@ -53,6 +56,8 @@
   const injectStyle = () => {
     const css = [
       ruleSelectors.length ? `${ruleSelectors.join(",\n")} { display: none !important; }` : "",
+      // Amedia's paywall prompt box - see amedia-domains.tsv for the CMS this targets.
+      settings.autoAmedia ? `#aid-overlay { display: none !important; }` : "",
       settings.unblur
         ? `[${MARK}~="blur"] { filter: none !important; -webkit-filter: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }`
         : "",
@@ -91,6 +96,11 @@
   };
 
   const sweep = () => {
+    if (settings.autoAmedia) {
+      const overlay = document.getElementById("aid-overlay");
+      if (overlay && mark(overlay, "amedia")) changed++;
+    }
+
     for (const sel of ruleSelectors) {
       let matches;
       try {
