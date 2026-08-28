@@ -11,12 +11,34 @@
     unblur: true,
     unfade: true,
     unlockScroll: true,
+    hideConsent: false,
+    hideAds: false,
     watchSeconds: 30,
     rules: [],
   };
 
   const settings = { ...DEFAULTS, ...(await chrome.storage.sync.get(DEFAULTS)) };
   const STYLE_ID = "clear-view-style";
+  // Sourcepoint is the consent platform Amedia runs (its state shows up as the
+  // _sp_user_consent_* keys and the consentUUID cookie). Its container ids
+  // carry a per-site account number - sp_message_container_1234 - so match on
+  // the prefix rather than any one site's id.
+  const CONSENT_SELECTOR =
+    'div[id^="sp_message_container_"], iframe[id^="sp_message_iframe_"], .sp_veil';
+  // Amedia's own ad markup: <bazaar-ad> slots (toppbanner-1, skyskraper-1,
+  // takeover-1 ...) plus the wrappers that reserve their height, which would
+  // otherwise leave a gap where the ad was. advantage-wrapper is deliberately
+  // not here - it carries subscriber benefits, not advertising.
+  const AD_SELECTOR = [
+    "bazaar-ad",
+    "bazaar-ad-config",
+    "bazaar-config",
+    "challenge-ad",
+    "smart-banner",
+    ".am-bazaar-ad",
+    ".maelstrom-topbanner",
+    ".maelstrom-sticky-sky",
+  ].join(", ");
   const MARK = "data-clear-view";
   const MAX_ELEMENTS = 20000; // don't crawl a pathological page forever
   const seen = new WeakSet();
@@ -57,6 +79,35 @@
       ruleSelectors.length ? `${ruleSelectors.join(",\n")} { display: none !important; }` : "",
       // Amedia's paywall prompt box - see amedia-domains.tsv for the CMS this targets.
       `#aid-overlay { display: none !important; }`,
+      // The Sourcepoint consent dialog ("Personverninnstillinger"), off unless
+      // asked for. Hiding it leaves consent unrecorded, so Sourcepoint
+      // re-renders it on the next load and the observer below hides it again.
+      //
+      // Hiding the dialog does not lift the scroll lock behind it. Sourcepoint
+      // puts the class on <html> and locks <body> as a descendant:
+      //
+      //   .sp-message-open body { overflow: hidden !important; position: fixed !important; }
+      //
+      // so the override has to out-specify a (0,1,1) !important rule, not just
+      // match it - a tie would be settled by stylesheet order, which is not
+      // ours to control. It rides with this setting rather than with "Unlock
+      // scrolling": hiding the dialog is what leaves the page locked, so the
+      // same switch owns putting scrolling back.
+      settings.hideConsent
+        ? `${CONSENT_SELECTOR} { display: none !important; }
+html.sp-message-open body,
+html[${MARK}~="unlock"] body,
+html[${MARK}~="unlock"] body[${MARK}~="unlock"],
+html[${MARK}~="unlock"] {
+  overflow: auto !important;
+  position: static !important;
+  top: auto !important;
+}`
+        : "",
+      // Amedia's ad slots, off unless asked for. This only hides them: a
+      // content script cannot stop the requests, which would take
+      // declarativeNetRequest and a rule set. The ads still load.
+      settings.hideAds ? `${AD_SELECTOR} { display: none !important; }` : "",
       settings.unblur
         ? `[${MARK}~="blur"] { filter: none !important; -webkit-filter: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }`
         : "",
@@ -94,9 +145,40 @@
     for (const p of props) el.style.setProperty(p, "none", "important");
   };
 
+  /** Undo a consent dialog's scroll lock, whichever way the page applied it. */
+  const unlockPage = () => {
+    for (const el of [document.documentElement, document.body]) {
+      if (!el) continue;
+      // Guard the remove(): taking a class off that was never there would
+      // still churn the observer this script installs.
+      if (el.classList.contains("sp-message-open")) el.classList.remove("sp-message-open");
+      if (mark(el, "unlock")) changed++;
+      // Inline !important, not removeProperty: the lock comes from a
+      // stylesheet rule that is itself !important, so there is no inline
+      // declaration to remove and only an inline !important outranks it.
+      el.style.setProperty("overflow", "auto", "important");
+      el.style.setProperty("position", "static", "important");
+      el.style.setProperty("top", "auto", "important");
+    }
+  };
+
   const sweep = () => {
     const overlay = document.getElementById("aid-overlay");
     if (overlay && mark(overlay, "amedia")) changed++;
+
+    const consent = settings.hideConsent ? document.querySelectorAll(CONSENT_SELECTOR) : [];
+    for (const el of consent) {
+      if (mark(el, "consent")) changed++;
+    }
+    // Only once a dialog was actually found - html/body must not be touched on
+    // a page that never locked anything.
+    if (consent.length) unlockPage();
+
+    if (settings.hideAds) {
+      for (const el of document.querySelectorAll(AD_SELECTOR)) {
+        if (mark(el, "ad")) changed++;
+      }
+    }
 
     for (const sel of ruleSelectors) {
       let matches;
@@ -158,13 +240,26 @@
   const watchMs = Math.max(0, Number(settings.watchSeconds) || 0) * 1000;
   if (watchMs) {
     if (!window.__clearViewObserver) {
+      // forceNone() writes inline styles, which this observer watches, so an
+      // unthrottled sweep re-triggers itself - and every sweep is a
+      // getComputedStyle pass over the whole document. Coalesce the batches a
+      // hydrating page fires into one pass. A timer rather than rAF, so a page
+      // loaded in a background tab still settles before the watch window ends.
+      let passTimer = null;
+      const schedulePass = () => {
+        if (passTimer !== null) return;
+        passTimer = setTimeout(() => {
+          passTimer = null;
+          injectStyle();
+          sweep();
+        }, 50);
+      };
       const observer = new MutationObserver((mutations) => {
         // A restyled element has to be looked at again, so drop it from `seen`.
         for (const m of mutations) {
           if (m.type === "attributes" && !m.target.hasAttribute(MARK)) seen.delete(m.target);
         }
-        injectStyle();
-        sweep();
+        schedulePass();
       });
       observer.observe(document.documentElement, {
         childList: true,

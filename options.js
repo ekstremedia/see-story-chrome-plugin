@@ -2,12 +2,14 @@ const DEFAULTS = {
   unblur: true,
   unfade: true,
   unlockScroll: true,
+  hideConsent: false,
+  hideAds: false,
   watchSeconds: 30,
   rules: [],
 };
 
 const $ = (id) => document.getElementById(id);
-const TOGGLES = ["unblur", "unfade", "unlockScroll"];
+const TOGGLES = ["unblur", "unfade", "unlockScroll", "hideConsent", "hideAds"];
 const rulesEl = $("rules");
 
 const readRules = () =>
@@ -33,7 +35,11 @@ const addRule = (rule = {}) => {
   node.querySelector('[data-action="delete"]').addEventListener("click", () => {
     node.remove();
     refreshEmpty();
+    queueSave();
   });
+  for (const el of node.querySelectorAll("[data-field]")) {
+    el.addEventListener(el.type === "checkbox" ? "change" : "input", queueSave);
+  }
   rulesEl.appendChild(node);
   refreshEmpty();
   return node;
@@ -66,13 +72,19 @@ const load = async () => {
 $("autoAmedia").addEventListener("change", async (event) => {
   const checkbox = event.target;
   if (!AMEDIA_ORIGINS.length) return;
-  if (checkbox.checked) {
-    const granted = await chrome.permissions.request({ origins: AMEDIA_ORIGINS });
-    checkbox.checked = granted;
-    if (granted) say("Auto-apply on.");
-  } else {
-    await chrome.permissions.remove({ origins: AMEDIA_ORIGINS });
-    say("Auto-apply off.");
+  try {
+    if (checkbox.checked) {
+      const granted = await chrome.permissions.request({ origins: AMEDIA_ORIGINS });
+      checkbox.checked = granted;
+      if (granted) say("Auto-apply on.");
+    } else {
+      await chrome.permissions.remove({ origins: AMEDIA_ORIGINS });
+      say("Auto-apply off.");
+    }
+  } catch (e) {
+    // The checkbox must never claim access Chrome did not actually grant.
+    checkbox.checked = await chrome.permissions.contains({ origins: AMEDIA_ORIGINS });
+    say(`Could not change that: ${e.message}`);
   }
 });
 
@@ -91,8 +103,22 @@ const save = async () => {
   }
 };
 
+// Auto-save instead of a Save button: nothing to forget to press. Debounced
+// because the rule fields fire on every keystroke and chrome.storage.sync
+// caps how many writes it takes per minute.
+//
+// load() needs no guard against this - it only assigns to .value/.checked,
+// and a programmatic assignment fires no change or input event.
+let saveTimer = null;
+function queueSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(save, 400);
+}
+
+for (const key of TOGGLES) $(key).addEventListener("change", queueSave);
+$("watchSeconds").addEventListener("input", queueSave);
+
 $("add").addEventListener("click", () => addRule().querySelector('[data-field="name"]').focus());
-$("save").addEventListener("click", save);
 
 $("export").addEventListener("click", async () => {
   const settings = { ...DEFAULTS, ...(await chrome.storage.sync.get(DEFAULTS)) };
@@ -103,7 +129,8 @@ $("export").addEventListener("click", async () => {
   a.href = url;
   a.download = "amediaid-settings.json";
   a.click();
-  URL.revokeObjectURL(url);
+  // Revoking in the same tick can cancel the download before Chrome reads it.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 });
 
 $("import").addEventListener("click", () => $("file").click());

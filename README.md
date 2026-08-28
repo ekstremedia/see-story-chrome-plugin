@@ -30,6 +30,21 @@ itself on page load, no click needed, on the domain list in
 belongs there if it's both Amedia-owned and actually serves that markup — see
 the file's header for how each one was verified.
 
+It can also hide the **Personverninnstillinger** consent dialog — off by
+default, turn on **Hide privacy-consent dialogs** in options. Amedia runs
+Sourcepoint, whose dialog ids carry a per-site account number
+(`sp_message_container_1234`), so AmediAid matches on the prefix rather than
+on any one site's id. Hiding the dialog does not lift the scroll lock behind
+it — Sourcepoint puts an `sp-message-open` class on `<html>` and locks `<body>`
+from there with `overflow: hidden !important; position: fixed !important` — so
+AmediAid drops that class, forces the unlock inline, and keeps a
+higher-specificity rule in its own stylesheet in case the class comes back.
+The unlock rides with the same setting: hiding the dialog is what leaves the
+page locked, so one switch owns both halves. Hiding the dialog does not answer it, so no consent is
+recorded and Sourcepoint re-renders it on the next load — AmediAid hides it
+again. Sourcepoint is not Amedia-only, so a manual click on any other site
+using it hides that site's dialog too.
+
 Auto-apply is off by default. Turning it on asks Chrome to grant
 `optional_host_permissions` for that domain list only — nothing else, and
 nothing standing until you ask for it. Turning it back off calls
@@ -40,6 +55,19 @@ manual click on an Amedia page always clears it.
 be** — it names a specific publisher and offers to bypass its paywall
 automatically, which is a pattern the Store has removed extensions for
 before. GitHub is the only distribution channel, on purpose.
+
+It can hide Amedia's ads too — off by default, turn on **Hide ads on Amedia
+sites** in options. Amedia serves its own ad markup: `<bazaar-ad>` slots
+(`toppbanner-1`, `skyskraper-1`, `takeover-1` …) inside wrappers that reserve
+the slot's height, so AmediAid hides both and no gap is left where the ad was.
+`advantage-wrapper` is deliberately left alone — it carries subscriber
+benefits, not advertising.
+
+**This hides ads, it does not block them.** A content script runs after the
+page does; stopping the requests would take `declarativeNetRequest` and a
+maintained rule set, which this extension has neither of. The ads are still
+fetched and still cost you the bandwidth — they just stop taking up the page.
+If you want them never loaded, use an actual content blocker.
 
 ## Everywhere else — one click
 

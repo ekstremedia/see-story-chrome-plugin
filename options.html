@@ -25,6 +25,8 @@
       <label class="row"><input type="checkbox" id="unblur" /><span><strong>Remove CSS blur</strong><em>Clears <code>filter: blur()</code> and <code>backdrop-filter</code> from every element.</em></span></label>
       <label class="row"><input type="checkbox" id="unfade" /><span><strong>Remove fade-out masks</strong><em>Clears gradient <code>mask-image</code>, the trick that fades text out at the bottom.</em></span></label>
       <label class="row"><input type="checkbox" id="unlockScroll" /><span><strong>Unlock scrolling</strong><em>Restores <code>overflow</code> on <code>&lt;html&gt;</code> and <code>&lt;body&gt;</code>.</em></span></label>
+      <label class="row"><input type="checkbox" id="hideConsent" /><span><strong>Hide privacy-consent dialogs</strong><em>Off by default. Hides the Sourcepoint consent dialog — <em>Personverninnstillinger</em> — and lifts the scroll lock it leaves behind. Hiding a dialog is not answering it: no consent is recorded, so the site asks again on the next load. Sourcepoint is not Amedia-only, so this covers any site that uses it.</em></span></label>
+      <label class="row"><input type="checkbox" id="hideAds" /><span><strong>Hide ads on Amedia sites</strong><em>Off by default. Hides Amedia's own <code>&lt;bazaar-ad&gt;</code> slots and the wrappers that reserve height for them, so no gap is left behind. Hiding is not blocking — the ads still load, they just stop taking up the page. For ads that are never fetched you want a real content blocker; this is a layout fix, not one.</em></span></label>
       <label class="row"><input type="number" id="watchSeconds" min="0" max="300" step="5" /><span><strong>Keep re-applying for N seconds</strong><em>Pages re-render after loading. 0 turns the watcher off.</em></span></label>
     </section>
 
@@ -42,7 +44,6 @@
     </section>
 
     <footer>
-      <button id="save" class="primary">Save</button>
       <button id="export">Export JSON</button>
       <button id="import">Import JSON</button>
       <input type="file" id="file" accept="application/json,.json" hidden />

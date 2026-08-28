@@ -64,12 +64,19 @@ chrome.runtime.onMessage.addListener((message, sender) => {
   pendingBadges.set(tabId, entry);
 });
 
+// Every call here can reject if the tab closed first, so it swallows its own
+// errors: the callers are a message listener and a catch block, neither of
+// which has anywhere to put a rejection except the service worker console.
 async function setBadge(tabId, changed) {
   const ok = typeof changed === "number";
-  await chrome.action.setBadgeBackgroundColor({
-    tabId,
-    color: ok ? (changed ? "#2e7d32" : "#616161") : "#c62828",
-  });
-  await chrome.action.setBadgeText({ tabId, text: ok ? String(changed) : "!" });
-  setTimeout(() => chrome.action.setBadgeText({ tabId, text: "" }), 2500);
+  try {
+    await chrome.action.setBadgeBackgroundColor({
+      tabId,
+      color: ok ? (changed ? "#2e7d32" : "#616161") : "#c62828",
+    });
+    await chrome.action.setBadgeText({ tabId, text: ok ? String(changed) : "!" });
+  } catch {
+    return;
+  }
+  setTimeout(() => chrome.action.setBadgeText({ tabId, text: "" }).catch(() => {}), 2500);
 }
