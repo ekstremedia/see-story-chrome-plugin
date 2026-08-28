@@ -30,8 +30,22 @@ async function syncAmediaContentScriptNow() {
 
 chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   if (reason === "install") chrome.runtime.openOptionsPage();
+  await migrateStylingSetting();
   await syncAmediaContentScript();
 });
+// unblur, unfade and unlockScroll became the single clearStyling setting.
+// Without this, storage.sync.get() would hand back the clearStyling default of
+// true for a record that only has the old keys, quietly switching the passes
+// back on for someone who had turned one of them off. Removing the old keys
+// afterwards is what makes it safe to run again.
+async function migrateStylingSetting() {
+  const legacy = await chrome.storage.sync.get(["unblur", "unfade", "unlockScroll"]);
+  const keys = Object.keys(legacy);
+  if (keys.length === 0) return;
+  await chrome.storage.sync.set({ clearStyling: keys.every((key) => legacy[key] !== false) });
+  await chrome.storage.sync.remove(keys);
+}
+
 chrome.runtime.onStartup.addListener(syncAmediaContentScript);
 chrome.permissions.onAdded.addListener(syncAmediaContentScript);
 chrome.permissions.onRemoved.addListener(syncAmediaContentScript);
@@ -50,7 +64,7 @@ chrome.action.onClicked.addListener(async (tab) => {
 
 // clearview.js reports here whether it ran from the toolbar click (allFrames,
 // so one message per frame) or from the auto-registered Amedia content
-// script (single frame) — debounce so a multi-frame page's badge shows the
+// script (single frame). Debounce so a multi-frame page's badge shows the
 // sum instead of whichever frame's message lands last.
 chrome.runtime.onMessage.addListener((message, sender) => {
   if (message?.type !== "clear-view-result" || sender.tab?.id == null) return;

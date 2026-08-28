@@ -8,9 +8,9 @@
  */
 (async () => {
   const DEFAULTS = {
-    unblur: true,
-    unfade: true,
-    unlockScroll: true,
+    // One switch, not three: nobody wants the blur gone but the fade mask
+    // kept. They are the same decision, so they share a setting.
+    clearStyling: true,
     hideConsent: false,
     hideAds: false,
     watchSeconds: 30,
@@ -141,14 +141,10 @@ html[${MARK}~="unlock"] {
       settings.hideAds && isAmediaHost
         ? `${AD_SPONSORED_SELECTOR} { display: none !important; }`
         : "",
-      settings.unblur
-        ? `[${MARK}~="blur"] { filter: none !important; -webkit-filter: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }`
-        : "",
-      settings.unfade
-        ? `[${MARK}~="fade"] { -webkit-mask-image: none !important; mask-image: none !important; }`
-        : "",
-      settings.unlockScroll
-        ? `html[${MARK}~="scroll"], body[${MARK}~="scroll"] { overflow: auto !important; position: static !important; }`
+      settings.clearStyling
+        ? `[${MARK}~="blur"] { filter: none !important; -webkit-filter: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+[${MARK}~="fade"] { -webkit-mask-image: none !important; mask-image: none !important; }
+html[${MARK}~="scroll"], body[${MARK}~="scroll"] { overflow: auto !important; position: static !important; }`
         : "",
       ruleCss,
     ]
@@ -235,7 +231,7 @@ html[${MARK}~="unlock"] {
       }
     }
 
-    if (settings.unblur || settings.unfade) {
+    if (settings.clearStyling) {
       const all = document.querySelectorAll("*");
       const limit = Math.min(all.length, MAX_ELEMENTS);
       for (let i = 0; i < limit; i++) {
@@ -244,25 +240,20 @@ html[${MARK}~="unlock"] {
         seen.add(el);
         const cs = getComputedStyle(el);
 
-        if (
-          settings.unblur &&
-          (cs.filter.includes("blur(") || cs.backdropFilter?.includes("blur("))
-        ) {
+        if (cs.filter.includes("blur(") || cs.backdropFilter?.includes("blur(")) {
           if (mark(el, "blur")) changed++;
           forceNone(el, ["filter", "-webkit-filter", "backdrop-filter", "-webkit-backdrop-filter"]);
         }
 
-        if (settings.unfade) {
-          const maskImage = cs.maskImage || cs.webkitMaskImage || "none";
-          if (maskImage !== "none" && maskImage.includes("gradient")) {
-            if (mark(el, "fade")) changed++;
-            forceNone(el, ["mask-image", "-webkit-mask-image"]);
-          }
+        const maskImage = cs.maskImage || cs.webkitMaskImage || "none";
+        if (maskImage !== "none" && maskImage.includes("gradient")) {
+          if (mark(el, "fade")) changed++;
+          forceNone(el, ["mask-image", "-webkit-mask-image"]);
         }
       }
     }
 
-    if (settings.unlockScroll) {
+    if (settings.clearStyling) {
       for (const el of [document.documentElement, document.body]) {
         if (!el) continue;
         const cs = getComputedStyle(el);
