@@ -10,8 +10,16 @@ When you invoke the extension — by clicking the toolbar icon or pressing its
 keyboard shortcut, which are the same action — Chrome grants it temporary access
 to that one tab (the `activeTab` permission) so it can change how the page is
 rendered. That access ends when you navigate away. The extension holds no
-`host_permissions`, so it has no standing access to any website and cannot read
-any page you have not clicked it on.
+`host_permissions` for any other site, so it has no standing access and cannot
+read any page you have not clicked it on.
+
+The one exception: a fixed list of Amedia local-newspaper domains (see
+[README](README.md#auto-apply-on-amedia-sites-on-by-default)), declared as
+`host_permissions` so the extension can un-blur those articles automatically on
+page load. That is standing access, but only to that domain list, only to
+un-blur and remove the paywall overlay, and it can be turned off in the options
+page (the domains stay declared in the manifest either way — turning it off
+stops the script from running, it does not revoke the permission).
 
 The page content it touches is never read out, copied, stored, or sent to the
 author or to anyone else.

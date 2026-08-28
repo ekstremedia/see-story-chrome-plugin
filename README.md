@@ -4,8 +4,9 @@ A small Chrome extension that makes an unreadable page readable again — with o
 click. It strips CSS blur, gradient fade-outs and scroll locks from the `http`
 or `https` page you are on, and can hide elements you name yourself, per site.
 
-Nothing runs until you invoke it. No host permissions, no background activity,
-no data collected.
+Nothing runs until you invoke it, no host permissions, no background activity,
+no data collected — except on known Amedia local newspaper sites, which it
+auto-clears on page load by default (a toggle in options turns that off).
 
 ![Before and after: on the left an article with a dialog over it and the text
 blurred out, on the right the same article with the dialog gone and both the
@@ -101,23 +102,48 @@ Hide:      #reading-overlay
 "permissions": ["scripting", "activeTab", "storage"]
 ```
 
-That is the whole list, and there is no `host_permissions`, so the extension has
-**no** standing access to any site. `activeTab` grants one tab, only at the
-moment you invoke the extension — by clicking the icon or pressing the keyboard
-shortcut, which does the same thing — and it expires on navigation.
+That is the whole list for every site except the Amedia ones below — no
+`host_permissions`, so the extension has **no** standing access to any other
+site. `activeTab` grants one tab, only at the moment you invoke the extension —
+by clicking the icon or pressing the keyboard shortcut, which does the same
+thing — and it expires on navigation.
 
 `storage` holds your own rules. Nothing is sent to the author or to any server;
 the extension has none. Chrome itself syncs `chrome.storage.sync` across your
 own Chrome profile through Google if you have Chrome Sync turned on. See
 [PRIVACY.md](PRIVACY.md).
 
+### Auto-apply on Amedia sites (on by default)
+
+Amedia's paywalled articles all share the same markup — an `#aid-overlay` box
+holding the subscribe prompt, and `.aid-background-blur` blurring the text
+under it — so the extension un-blurs the article automatically on page load,
+no click needed, on that domain list only (`host_permissions` in
+`manifest.json`). This is the one exception to "no host permissions" above:
+those domains are standing access from the moment the extension loads, whether
+or not you ever use the feature — that's what makes the zero-click part
+possible (Chrome will only grant on-demand access, `optional_host_permissions`,
+in response to a real click, which defeats "automatic").
+
+Options page → **Auto-apply on known Amedia local-newspaper sites** turns the
+behavior off. The domains stay declared in the manifest either way; turning it
+off just stops the content script from running on them.
+
+The domain list itself is maintained in [`amedia-domains.tsv`](amedia-domains.tsv)
+— add or remove a line, then run `python3 sync_amedia_domains.py` to regenerate
+`manifest.json`. A domain only belongs there if it's both Amedia-owned and
+actually serves the `#aid-overlay`/`acdn.no` markup — see the file's header.
+
 ## Files
 
 ```
 manifest.json      Manifest V3
-background.js      Toolbar click -> inject into all frames -> set the badge
+background.js      Toolbar click -> inject into all frames -> set the badge.
+                   Also (un)registers the auto Amedia content script.
 clearview.js       The passes above; runs in the page, reads your settings
 options.html/.js/.css   Rule editor
+amedia-domains.tsv   Amedia auto-apply domain list (see Auto-apply section above)
+sync_amedia_domains.py   Regenerates manifest.json from amedia-domains.tsv
 icons/             16 / 32 / 48 / 128 + a 512 master
 make_icons.py      Regenerates icons/ (needs Pillow)
 make_store_zip.py  Builds the Chrome Web Store upload package

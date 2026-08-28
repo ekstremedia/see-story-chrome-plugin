@@ -176,5 +176,5 @@
     }, watchMs);
   }
 
-  return { changed };
+  chrome.runtime.sendMessage({ type: "clear-view-result", changed }).catch(() => {});
 })();

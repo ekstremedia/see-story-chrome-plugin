@@ -2,12 +2,13 @@ const DEFAULTS = {
   unblur: true,
   unfade: true,
   unlockScroll: true,
+  autoAmedia: true,
   watchSeconds: 30,
   rules: [],
 };
 
 const $ = (id) => document.getElementById(id);
-const TOGGLES = ["unblur", "unfade", "unlockScroll"];
+const TOGGLES = ["unblur", "unfade", "unlockScroll", "autoAmedia"];
 const rulesEl = $("rules");
 
 const readRules = () =>

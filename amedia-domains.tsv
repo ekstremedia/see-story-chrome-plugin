@@ -1,0 +1,96 @@
+# Amedia local-newspaper domains for the auto-apply feature (options page ->
+# "Automatic sites"). This file is the source of truth; manifest.json's
+# host_permissions is generated from it — after editing this file,
+# run: python3 sync_amedia_domains.py
+#
+# A domain belongs here only if BOTH are true:
+#   1. Wikipedia's "Aviser eid av Amedia" category lists it as Amedia-owned
+#      (https://no.wikipedia.org/wiki/Kategori:Aviser_eid_av_Amedia) — or it
+#      was confirmed directly, like avisa-hordaland.no and iharstad.no.
+#   2. Its homepage HTML actually loads assets from acdn.no — the CDN behind
+#      the shared `#aid-overlay` / `.aid-background-blur` /
+#      `<amedia-yokohama-incentive>` markup clearview.js targets. Ownership
+#      without the platform fingerprint (or vice versa) doesn't count.
+# Verified 2026-08-28 by fetching each homepage live and grepping for
+# "acdn.no". Format: domain<TAB>newspaper name.
+akersposten.no	Akersposten/Ullern Avis
+amta.no	Akershus Amtstidende
+an.no	Avisa Nordland
+ao.no	Avisa Oslo
+auraavis.no	Aura Avis
+austagderblad.no	Aust Agder Blad
+avisa-hordaland.no	Avisa Hordaland
+ba.no	Bergensavisen
+blv.no	Bladet Vesterålen
+budstikka.no	Budstikka
+bygdeposten.no	Bygdeposten
+eikerbladet.no	Eikerbladet
+enebakkavis.no	Enebakk Avis
+f-b.no	Fredriksstad Blad
+fd.no	Finnmark Dagblad
+finnmarken.no	Finnmarken
+finnmarksposten.no	Finnmarksposten
+firda.no	Firda
+firdaposten.no	Firdaposten
+fremover.no	Fremover
+gbnett.no	Gjesdalbuen
+gd.no	Gudbrandsdølen Dagningen
+gjengangeren.no	Gjengangeren
+glomdalen.no	Glåmdalen
+h-avis.no	Haugesunds Avis
+ha-halden.no	Halden Arbeiderblad
+hadeland.no	Hadeland
+hardanger-folkeblad.no	Hardanger Folkeblad
+helg.no	Helgelendingen
+iharstad.no	iHarstad
+indre.no	Indre Akershus Blad
+jarlsbergavis.no	Jarlsberg Avis
+krs.no	KRS – Avisen Kristiansand
+kv.no	Kragerø Blad Vestmar
+kvinnheringen.no	Kvinnheringen
+laagendalsposten.no	Laagendalsposten
+lierposten.no	Lierposten
+lofot-tidende.no	Lofot-Tidende
+lofotposten.no	Lofotposten
+moss-avis.no	Moss Avis
+nab.no	Nordre Aker Budstikke
+namdalsavisa.no	Namdalsavisa
+noblad.no	Nordstrands Blad
+nordhordland.no	Nordhordland
+nordlys.no	Nordlys
+oa.no	Oppland Arbeiderblad
+oblad.no	Østlandets Blad
+op.no	Østlands-Posten
+ostlendingen.no	Østlendingen
+oyene.no	Lokalavisen Øyene
+pd.no	Porsgrunns Dagblad
+r-a.no	Rakkestad Avis
+rablad.no	Rjukan Arbeiderblad
+ranablad.no	Rana Blad
+rb.no	Romerikes Blad
+retten.no	Arbeidets Rett
+ringblad.no	Ringerikes Blad
+ringsaker-blad.no	Ringsaker Blad
+rogavis.no	Rogalands Avis
+sa.no	Sarpsborg Arbeiderblad
+sb.no	Sandefjords Blad
+smaalenene.no	Smaalenenes Avis
+solungavisa.no	SolungAvisa
+sva.no	Sør-Varanger Avis
+svelviksposten.no	Svelviksposten
+ta.no	Telemarksavisa
+tb.no	Tønsbergs Blad
+telen.no	Telen
+tk.no	Tidens Krav
+totenidag.no	Toten Idag
+tvedestrandsposten.no	Tvedestrandsposten
+varingen.no	Varingen
+vestbyavis.no	Vestby Avis
+vestviken24.no	Vestviken 24
+aasavis.no	Ås Avis
+
+# --- Checked and deliberately left out — don't re-add without re-verifying ---
+# avvir.no        Ávvir            Amedia-owned but no acdn.no fingerprint; different platform (Sámi-language paper).
+# demokraten.no   Demokraten       301-redirects to dagsavisen.no/demokraten — a Dagsavisen section, not an Amedia site.
+# (unknown)       Stjørdalens Blad Wikipedia infobox gave bladet.no; loads but no fingerprint. Real domain not confirmed.
+# ialta.no        iAlta            Connection failed outright; likely dead or merged into another local title.

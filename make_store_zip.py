@@ -25,9 +25,20 @@ SHIP = [
 
 
 def main():
-    version = json.load(open("manifest.json"))["version"]
+    manifest = json.load(open("manifest.json"))
+    version = manifest["version"]
     os.makedirs("dist", exist_ok=True)
     out = f"dist/clear-view-{version}.zip"
+
+    # The Amedia auto-apply feature names a specific publisher and bypasses its
+    # paywall without a click - Web Store review has removed extensions for
+    # exactly that pattern before (see STORE.md). It is GitHub-only; never ship
+    # it in a store package.
+    if manifest.get("host_permissions"):
+        raise SystemExit(
+            "manifest.json has host_permissions (Amedia auto-apply) - "
+            "this build is not for the Chrome Web Store. See STORE.md."
+        )
 
     missing = [f for f in SHIP if not os.path.exists(f)]
     if missing:

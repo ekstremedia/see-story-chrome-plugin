@@ -140,3 +140,13 @@ have been removed from the store before. Clear View is a general rendering
 utility and ships with an empty rule list — it names no site and no publisher.
 Keep the listing copy that way: describe what it does to CSS, not what any
 particular site is doing to you.
+
+**The Amedia auto-apply option (options page → Automatic sites) is GitHub-only,
+never submit it to the Web Store.** It names a specific publisher and
+un-blurs its paywalled articles automatically, on by default, with no click —
+exactly the pattern above. It also gives the extension standing
+`host_permissions` for ~75 domains, on by default from the moment it loads —
+a much bigger permission footprint than "no host permissions" describes.
+`make_store_zip.py` refuses to build a package while `manifest.json` has
+`host_permissions` set, so a store upload should never accidentally include
+it — don't remove that guard to work around it.
