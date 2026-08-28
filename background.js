@@ -50,7 +50,7 @@ chrome.action.onClicked.addListener(async (tab) => {
 
 // clearview.js reports here whether it ran from the toolbar click (allFrames,
 // so one message per frame) or from the auto-registered Amedia content
-// script (single frame) — debounce so a multi-frame page's badge shows the
+// script (single frame). Debounce so a multi-frame page's badge shows the
 // sum instead of whichever frame's message lands last.
 chrome.runtime.onMessage.addListener((message, sender) => {
   if (message?.type !== "clear-view-result" || sender.tab?.id == null) return;

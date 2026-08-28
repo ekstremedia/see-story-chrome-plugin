@@ -1,94 +1,315 @@
+/*
+ * Amedia mastheads are flat saturated colour blocks with heavy tight type -
+ * that is the house style this page borrows, rather than the hairline-rule
+ * broadsheet look. Extension pages cannot load remote fonts, so the display
+ * voice comes from scale and tracking on system faces.
+ */
 :root {
-  --bg: #f6f7f9;
-  --card: #ffffff;
-  --ink: #1b1f24;
-  --muted: #5b6672;
-  --line: #d9dee5;
-  --accent: #1e6bd6;
-  --danger: #c62828;
+  --paper: #f7f6f3;
+  --surface: #ffffff;
+  --ink: #101820;
+  --muted: #626c78;
+  --line: #e4e2dc;
+  --signal: #c8102e;
+  --masthead-top: #17324c;
+  --masthead-bottom: #0c1a29;
+  --masthead-ink: #ffffff;
+  --focus: #2f6fd0;
+  --shadow: 0 1px 2px rgba(16, 24, 32, 0.05), 0 8px 24px -12px rgba(16, 24, 32, 0.18);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #16191d;
-    --card: #1e2227;
-    --ink: #e8ebef;
-    --muted: #9aa5b1;
-    --line: #2e343b;
-    --accent: #4f9bff;
-    --danger: #ef5350;
+    --paper: #0b0e11;
+    --surface: #14181d;
+    --ink: #e9edf2;
+    --muted: #939ca8;
+    --line: #252b33;
+    --signal: #ef3f57;
+    --focus: #6ea8ff;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.7);
   }
 }
 
 * { box-sizing: border-box; }
 
 body {
-  margin: 0 auto;
-  padding: 32px 24px 64px;
-  max-width: 780px;
-  background: var(--bg);
+  margin: 0;
+  background: var(--paper);
   color: var(--ink);
-  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-header { display: flex; gap: 14px; align-items: center; margin-bottom: 28px; }
-h1 { margin: 0; font-size: 22px; }
-h2 { margin: 0 0 12px; font-size: 15px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-.sub { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+/* --- masthead ------------------------------------------------------------ */
+
+.masthead {
+  background: linear-gradient(180deg, var(--masthead-top), var(--masthead-bottom));
+  color: var(--masthead-ink);
+  padding: 34px 24px 44px;
+  /* The highlight keeps a flat fill from reading as dead space; the hairline
+     below stops the block dissolving into the page in dark mode. */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.masthead-inner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.masthead img { border-radius: 10px; flex: none; }
+.masthead-text { flex: 1; min-width: 0; }
+
+/* NB | EN, sitting in the masthead because the language is a property of the
+   whole page rather than of any one setting. */
+.lang {
+  display: flex;
+  flex: none;
+  align-self: flex-start;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.lang-btn {
+  padding: 4px 11px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.66);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: color 140ms ease, background 140ms ease;
+}
+
+.lang-btn:hover { color: #fff; }
+.lang-btn.is-on { background: #fff; color: var(--masthead-bottom); }
+
+/* The page does the thing the extension does, once, on load. */
+.wordmark {
+  margin: 0;
+  font-size: clamp(30px, 6vw, 38px);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  animation: come-into-focus 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes come-into-focus {
+  from { filter: blur(7px); opacity: 0.25; }
+  to { filter: blur(0); opacity: 1; }
+}
+
+.tagline {
+  margin: 6px 0 0;
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 46ch;
+}
+
+/* --- layout -------------------------------------------------------------- */
+
+main, footer {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+main { margin-top: -18px; }
 
 section {
-  background: var(--card);
+  background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 20px;
-  margin-bottom: 20px;
+  border-radius: 14px;
+  padding: 8px 20px 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
 }
 
-.section-head { display: flex; justify-content: space-between; align-items: center; }
-.section-head h2 { margin: 0; }
+h2 {
+  margin: 16px 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
 
-.row { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-top: 1px solid var(--line); }
+.section-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.section-head h2 { margin-bottom: 0; }
+.section-note, .empty { color: var(--muted); font-size: 13px; }
+.section-note { margin: 8px 0 0; }
+.empty { margin: 14px 0 4px; }
+
+/* --- toggle rows --------------------------------------------------------- */
+
+.row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 13px 0;
+  border-top: 1px solid var(--line);
+}
+
 .row:first-of-type { border-top: 0; }
-.row input[type="checkbox"] { margin-top: 3px; width: 16px; height: 16px; }
-.row input[type="number"] { width: 72px; padding: 4px 6px; }
-.row span { display: flex; flex-direction: column; }
-.row em { font-style: normal; color: var(--muted); font-size: 13px; }
+.row-text { min-width: 0; }
+.row-title { display: block; font-weight: 600; cursor: pointer; }
+.row-note { margin: 2px 0 0; color: var(--muted); font-size: 13.5px; }
 
-.rule { border: 1px solid var(--line); border-radius: 8px; padding: 14px; margin-top: 14px; }
-.rule-head { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
-.rule-head .name { flex: 1; font-weight: 600; }
-.enabled { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.switch {
+  appearance: none;
+  flex: none;
+  position: relative;
+  width: 40px;
+  height: 23px;
+  margin: 1px 0 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--line);
+  cursor: pointer;
+  transition: background 160ms ease;
+}
 
-label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 10px; }
-.hint { font-weight: 400; opacity: .8; }
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: transform 160ms cubic-bezier(0.3, 0.8, 0.3, 1);
+}
+
+.switch:checked { background: var(--signal); }
+.switch:checked::after { transform: translateX(17px); }
+.switch.small { width: 34px; height: 20px; }
+.switch.small::after { width: 14px; height: 14px; }
+.switch.small:checked::after { transform: translateX(14px); }
+
+details { margin-top: 8px; font-size: 13px; }
+summary {
+  cursor: pointer;
+  color: var(--muted);
+  width: fit-content;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+}
+summary:hover { color: var(--ink); }
+details p { margin: 8px 0 0; color: var(--muted); }
+
+/* --- rules --------------------------------------------------------------- */
+
+.rule {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 14px;
+  background: var(--paper);
+}
+
+.rule-head { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+.rule-head .name { flex: 1; margin-top: 0; font-weight: 600; }
+
+label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+.rule label:last-child { margin-bottom: 0; }
+.hint { font-weight: 400; opacity: 0.85; }
 
 input[type="text"], input[type="number"], textarea {
   width: 100%;
-  margin-top: 4px;
-  padding: 7px 9px;
-  background: var(--bg);
+  margin-top: 5px;
+  padding: 8px 10px;
+  background: var(--surface);
   color: var(--ink);
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 8px;
   font: inherit;
+  transition: border-color 140ms ease;
 }
 
-textarea { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; resize: vertical; }
-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; }
+input[type="number"] {
+  flex: none;
+  width: 68px;
+  margin-top: 0;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+input[type="text"]:hover, textarea:hover { border-color: var(--muted); }
+
+textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  resize: vertical;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+  color: var(--ink);
+}
+
+/* --- buttons and footer -------------------------------------------------- */
 
 button {
   padding: 7px 14px;
   border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--card);
+  border-radius: 8px;
+  background: var(--surface);
   color: var(--ink);
   font: inherit;
+  font-weight: 500;
   cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease;
 }
-button:hover { border-color: var(--accent); }
-button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-button.danger { color: var(--danger); }
 
-footer { display: flex; gap: 10px; align-items: center; }
-#status { color: var(--muted); font-size: 13px; }
-.empty { color: var(--muted); font-size: 13px; }
+button:hover { border-color: var(--muted); }
+button.primary { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+button.primary:hover { opacity: 0.88; }
+button.danger { color: var(--signal); }
+button.danger:hover { border-color: var(--signal); }
+
+footer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding-top: 4px;
+  padding-bottom: 48px;
+}
+
+#status {
+  color: var(--muted);
+  font-size: 13px;
+  /* fades in on save, so an autosave confirmation never snaps into place */
+  animation: fade-in 220ms ease both;
+}
+
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::after { animation: none !important; transition: none !important; }
+}
+
+@media (max-width: 560px) {
+  .masthead { padding: 26px 18px 34px; }
+  main, footer { padding: 0 18px; }
+  .rule-head { flex-wrap: wrap; }
+}

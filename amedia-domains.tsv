@@ -1,13 +1,13 @@
 # Amedia local-newspaper domains for the auto-apply feature (options page ->
-# "Automatic sites"). This file is the source of truth; manifest.json's
-# host_permissions is generated from it — after editing this file,
+# "Automatic"). This file is the source of truth; manifest.json's
+# optional_host_permissions is generated from it. After editing this file,
 # run: python3 sync_amedia_domains.py
 #
 # A domain belongs here only if BOTH are true:
 #   1. Wikipedia's "Aviser eid av Amedia" category lists it as Amedia-owned
-#      (https://no.wikipedia.org/wiki/Kategori:Aviser_eid_av_Amedia) — or it
+#      (https://no.wikipedia.org/wiki/Kategori:Aviser_eid_av_Amedia), or it
 #      was confirmed directly, like avisa-hordaland.no and iharstad.no.
-#   2. Its homepage HTML actually loads assets from acdn.no — the CDN behind
+#   2. Its homepage HTML actually loads assets from acdn.no, the CDN behind
 #      the shared `#aid-overlay` / `.aid-background-blur` /
 #      `<amedia-yokohama-incentive>` markup clearview.js targets. Ownership
 #      without the platform fingerprint (or vice versa) doesn't count.
@@ -89,8 +89,8 @@ vestbyavis.no	Vestby Avis
 vestviken24.no	Vestviken 24
 aasavis.no	Ås Avis
 
-# --- Checked and deliberately left out — don't re-add without re-verifying ---
+# --- Checked and deliberately left out, don't re-add without re-verifying ---
 # avvir.no        Ávvir            Amedia-owned but no acdn.no fingerprint; different platform (Sámi-language paper).
-# demokraten.no   Demokraten       301-redirects to dagsavisen.no/demokraten — a Dagsavisen section, not an Amedia site.
+# demokraten.no   Demokraten       301-redirects to dagsavisen.no/demokraten, a Dagsavisen section, not an Amedia site.
 # (unknown)       Stjørdalens Blad Wikipedia infobox gave bladet.no; loads but no fingerprint. Real domain not confirmed.
 # ialta.no        iAlta            Connection failed outright; likely dead or merged into another local title.
