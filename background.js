@@ -1,6 +1,32 @@
 const AMEDIA_SCRIPT_ID = "clear-view-amedia-auto";
 const pendingBadges = new Map(); // tabId -> { total, timer }
 
+// (Re)registers or unregisters the auto-run Amedia content script to match
+// whether its optional host permission is currently granted. Off by default -
+// granting it requires the user to check the options-page box, which is the
+// user gesture Chrome requires for chrome.permissions.request() anyway.
+//
+// Queued through amediaSync rather than called directly: onInstalled,
+// onStartup and onAdded/onRemoved can all fire close together, and two
+// overlapping calls could each read a stale permission state and leave the
+// registration out of sync with it.
+let amediaSync = Promise.resolve();
+const syncAmediaContentScript = () => (amediaSync = amediaSync.catch(() => {}).then(syncAmediaContentScriptNow));
+
+async function syncAmediaContentScriptNow() {
+  const { optional_host_permissions: origins = [] } = chrome.runtime.getManifest();
+  if (!origins.length) return;
+  const has = await chrome.permissions.contains({ origins });
+  const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [AMEDIA_SCRIPT_ID] });
+  if (has && existing.length === 0) {
+    await chrome.scripting.registerContentScripts([
+      { id: AMEDIA_SCRIPT_ID, js: ["clearview.js"], matches: origins, runAt: "document_idle" },
+    ]);
+  } else if (!has && existing.length > 0) {
+    await chrome.scripting.unregisterContentScripts({ ids: [AMEDIA_SCRIPT_ID] });
+  }
+}
+
 chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   if (reason === "install") chrome.runtime.openOptionsPage();
   await syncAmediaContentScript();
@@ -37,32 +63,6 @@ chrome.runtime.onMessage.addListener((message, sender) => {
   }, 100);
   pendingBadges.set(tabId, entry);
 });
-
-// (Re)registers or unregisters the auto-run Amedia content script to match
-// whether its optional host permission is currently granted. Off by default -
-// granting it requires the user to check the options-page box, which is the
-// user gesture Chrome requires for chrome.permissions.request() anyway.
-//
-// Queued through amediaSync rather than called directly: onInstalled,
-// onStartup and onAdded/onRemoved can all fire close together, and two
-// overlapping calls could each read a stale permission state and leave the
-// registration out of sync with it.
-let amediaSync = Promise.resolve();
-const syncAmediaContentScript = () => (amediaSync = amediaSync.catch(() => {}).then(syncAmediaContentScriptNow));
-
-async function syncAmediaContentScriptNow() {
-  const { optional_host_permissions: origins = [] } = chrome.runtime.getManifest();
-  if (!origins.length) return;
-  const has = await chrome.permissions.contains({ origins });
-  const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [AMEDIA_SCRIPT_ID] });
-  if (has && existing.length === 0) {
-    await chrome.scripting.registerContentScripts([
-      { id: AMEDIA_SCRIPT_ID, js: ["clearview.js"], matches: origins, runAt: "document_idle" },
-    ]);
-  } else if (!has && existing.length > 0) {
-    await chrome.scripting.unregisterContentScripts({ ids: [AMEDIA_SCRIPT_ID] });
-  }
-}
 
 async function setBadge(tabId, changed) {
   const ok = typeof changed === "number";
