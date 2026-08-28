@@ -63,6 +63,19 @@ the slot's height, so AmediAid hides both and no gap is left where the ad was.
 `advantage-wrapper` is deliberately left alone — it carries subscriber
 benefits, not advertising.
 
+Three more things go with it. The `tivoli-realestatecarousel` and
+`tivoli-jobcarousel` marketplace widgets, 300px of reserved height each.
+Commercial embeds, which Amedia labels itself with
+`data-component-layout="commercial"` — matching the label and not the
+`<amedia-smartembed>` element around it, because that same element also
+carries editorial video and maps. And sponsored posts, which use the same
+teaser markup as an ordinary article —
+the only thing separating them is a link to `/vis/annonse/`, so AmediAid
+matches on that and hides the grid cell around it rather than the teaser
+inside, which would leave an empty slot. That last rule needs `:has()`
+(Chrome 105+) and sits in a stylesheet rule of its own, so that on an older
+browser it fails alone instead of taking the rest of the ad rules with it.
+
 **This hides ads, it does not block them.** A content script runs after the
 page does; stopping the requests would take `declarativeNetRequest` and a
 maintained rule set, which this extension has neither of. The ads are still

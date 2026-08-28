@@ -38,6 +38,25 @@
     ".am-bazaar-ad",
     ".maelstrom-topbanner",
     ".maelstrom-sticky-sky",
+    // Marketplace carousels - property and job listings, 300px of reserved
+    // height each.
+    "tivoli-realestatecarousel",
+    "tivoli-jobcarousel",
+    // Amedia labels its own commercial embeds. The same <amedia-smartembed>
+    // element carries editorial content too - video, maps - so match the
+    // label, not the element.
+    '[data-component-layout="commercial"]',
+  ].join(", ");
+  // A sponsored post sits in the same teaser markup as an ordinary article;
+  // the only thing telling them apart is the link, which points at
+  // /vis/annonse/. Hide the grid cell, not the teaser inside it, or the front
+  // page is left with an empty slot. Kept in its own rule because :has() is
+  // Chrome 105+, and one unparseable selector would otherwise take every ad
+  // rule above down with it.
+  const AD_SPONSORED_SELECTOR = [
+    'optimus-element:has(a[href*="/vis/annonse/" i])',
+    '.b-teaser-container:has(> a[href*="/vis/annonse/" i])',
+    'optimus-element:has([data-component-layout="commercial"])',
   ].join(", ");
   const MARK = "data-clear-view";
   const MAX_ELEMENTS = 20000; // don't crawl a pathological page forever
@@ -108,6 +127,7 @@ html[${MARK}~="unlock"] {
       // content script cannot stop the requests, which would take
       // declarativeNetRequest and a rule set. The ads still load.
       settings.hideAds ? `${AD_SELECTOR} { display: none !important; }` : "",
+      settings.hideAds ? `${AD_SPONSORED_SELECTOR} { display: none !important; }` : "",
       settings.unblur
         ? `[${MARK}~="blur"] { filter: none !important; -webkit-filter: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }`
         : "",
@@ -177,6 +197,15 @@ html[${MARK}~="unlock"] {
     if (settings.hideAds) {
       for (const el of document.querySelectorAll(AD_SELECTOR)) {
         if (mark(el, "ad")) changed++;
+      }
+      // Counted separately so an old Chrome without :has() throws here and
+      // leaves the plain selectors above working.
+      try {
+        for (const el of document.querySelectorAll(AD_SPONSORED_SELECTOR)) {
+          if (mark(el, "ad")) changed++;
+        }
+      } catch {
+        // no :has() - the CSS rule is inert too, nothing else to do
       }
     }
 
