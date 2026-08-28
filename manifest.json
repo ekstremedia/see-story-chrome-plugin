@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AmediAid",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Clears Amedia local-newspaper paywalls automatically, plus one click to strip CSS blur, fade-out masks and scroll locks anywhere else.",
   "permissions": ["scripting", "activeTab", "storage"],
   "optional_host_permissions": [
