@@ -3,23 +3,30 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Clear View - options</title>
+    <title>AmediAid - options</title>
     <link rel="stylesheet" href="options.css" />
   </head>
   <body>
     <header>
       <img src="icons/icon48.png" alt="" width="40" height="40" />
       <div>
-        <h1>Clear View</h1>
-        <p class="sub">Click the toolbar icon to clear the page you are on. Nothing runs until you do.</p>
+        <h1>AmediAid</h1>
+        <p class="sub">Clears Amedia local-newspaper paywalls automatically. Click the toolbar icon to clear any other page too.</p>
       </div>
     </header>
 
     <section>
-      <h2>What a click does</h2>
+      <h2>Amedia sites</h2>
+      <label class="row"><input type="checkbox" id="autoAmedia" /><span><strong>Auto-apply on known Amedia local-newspaper sites</strong><em>Off by default. Un-blurs the article and removes the subscribe prompt the moment the page loads, no click needed. Turning this on asks Chrome to grant access to those sites' domains only — everywhere else stays click-only, zero standing access. Turning it back off calls <code>chrome.permissions.remove()</code>, so nothing is left granted. Either way, clicking the toolbar icon on an Amedia page always clears it too.</em></span></label>
+    </section>
+
+    <section>
+      <h2>Everywhere else, on click</h2>
       <label class="row"><input type="checkbox" id="unblur" /><span><strong>Remove CSS blur</strong><em>Clears <code>filter: blur()</code> and <code>backdrop-filter</code> from every element.</em></span></label>
       <label class="row"><input type="checkbox" id="unfade" /><span><strong>Remove fade-out masks</strong><em>Clears gradient <code>mask-image</code>, the trick that fades text out at the bottom.</em></span></label>
       <label class="row"><input type="checkbox" id="unlockScroll" /><span><strong>Unlock scrolling</strong><em>Restores <code>overflow</code> on <code>&lt;html&gt;</code> and <code>&lt;body&gt;</code>.</em></span></label>
+      <label class="row"><input type="checkbox" id="hideConsent" /><span><strong>Hide privacy-consent dialogs</strong><em>Off by default. Hides the Sourcepoint consent dialog — <em>Personverninnstillinger</em> — and lifts the scroll lock it leaves behind. Hiding a dialog is not answering it: no consent is recorded, so the site asks again on the next load. Sourcepoint is not Amedia-only, so this covers any site that uses it.</em></span></label>
+      <label class="row"><input type="checkbox" id="hideAds" /><span><strong>Hide ads on Amedia sites</strong><em>Off by default. Hides Amedia's own <code>&lt;bazaar-ad&gt;</code> slots and the wrappers that reserve height for them, the property and job carousels, commercial embeds, and sponsored posts dressed up as articles in the front-page grid — so no gap is left behind. Hiding is not blocking — the ads still load, they just stop taking up the page. For ads that are never fetched you want a real content blocker; this is a layout fix, not one.</em></span></label>
       <label class="row"><input type="number" id="watchSeconds" min="0" max="300" step="5" /><span><strong>Keep re-applying for N seconds</strong><em>Pages re-render after loading. 0 turns the watcher off.</em></span></label>
     </section>
 
@@ -29,15 +36,14 @@
         <button id="add" class="primary">Add rule</button>
       </div>
       <p class="sub">
-        Optional. A rule hides elements you name, on the hosts you name. Find a selector with
-        right-click &rarr; Inspect in DevTools.
+        Optional, for sites other than Amedia. A rule hides elements you name, on the hosts you
+        name. Find a selector with right-click &rarr; Inspect in DevTools.
       </p>
       <div id="rules"></div>
-      <p class="empty" id="empty">No rules yet. The three options above already work everywhere without one.</p>
+      <p class="empty" id="empty">No rules yet. The options above already cover Amedia sites and generic blur/fade/scroll everywhere else.</p>
     </section>
 
     <footer>
-      <button id="save" class="primary">Save</button>
       <button id="export">Export JSON</button>
       <button id="import">Import JSON</button>
       <input type="file" id="file" accept="application/json,.json" hidden />
