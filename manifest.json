@@ -4,7 +4,7 @@
   "version": "2.0.0",
   "description": "Clears Amedia local-newspaper paywalls automatically, plus one click to strip CSS blur, fade-out masks and scroll locks anywhere else.",
   "permissions": ["scripting", "activeTab", "storage"],
-  "host_permissions": [
+  "optional_host_permissions": [
     "*://*.aasavis.no/*",
     "*://*.akersposten.no/*",
     "*://*.amta.no/*",

@@ -1,13 +1,13 @@
 # AmediAid
 
-A Chrome extension that clears Amedia's local-newspaper paywalls automatically —
-no click, no subscription. It also works as a one-click, un-blur-any-page tool
-on any other site.
+A Chrome extension that clears Amedia's local-newspaper paywalls — no
+subscription needed. It also works as a one-click, un-blur-any-page tool on
+any other site.
 
 Nothing runs until you invoke it, no host permissions, no background activity,
-no data collected — except on the ~75 Amedia domains listed in
-[`amedia-domains.tsv`](amedia-domains.tsv), which it clears on page load by
-default (a toggle in options turns that off).
+no data collected. Optionally, turn on auto-apply for the ~75 Amedia domains
+listed in [`amedia-domains.tsv`](amedia-domains.tsv) and it clears those on
+page load too, no click needed — off by default, on when you ask for it.
 
 ![Before and after: on the left an article with a dialog over it and the text
 blurred out, on the right the same article with the dialog gone and both the
@@ -17,30 +17,29 @@ photo and the text readable.](img/illustrasjon.jpeg)
 
 ---
 
-## Amedia sites — automatic
+## Amedia sites
 
 Amedia's paywalled articles all share the same markup: an `#aid-overlay` box
 holding the subscribe prompt, and `.aid-background-blur` blurring the article
-text under it. AmediAid hides the box and clears the blur the moment the page
-loads, on the domain list in [`amedia-domains.tsv`](amedia-domains.tsv) — add
-or remove a line, then run `python3 sync_amedia_domains.py` to regenerate
-`manifest.json`. A domain only belongs there if it's both Amedia-owned and
-actually serves that markup — see the file's header for how each one was
-verified.
+text under it. AmediAid always hides that box and clears that blur when it
+runs on an Amedia page — whether you click the toolbar icon, or turn on
+**Auto-apply on known Amedia local-newspaper sites** in options so it runs by
+itself on page load, no click needed, on the domain list in
+[`amedia-domains.tsv`](amedia-domains.tsv) — add or remove a line, then run
+`python3 sync_amedia_domains.py` to regenerate `manifest.json`. A domain only
+belongs there if it's both Amedia-owned and actually serves that markup — see
+the file's header for how each one was verified.
 
-This is the one thing here with standing access: those domains are
-`host_permissions` in `manifest.json`, granted from the moment the extension
-loads, whether or not you ever use the feature — that's what makes the
-zero-click part possible (Chrome will only grant *on-demand* access in
-response to a real click, which would defeat "automatic"). Options page →
-**Auto-apply on known Amedia local-newspaper sites** turns the behavior off;
-the domains stay declared in the manifest either way, turning it off just
-stops the content script from running on them.
+Auto-apply is off by default. Turning it on asks Chrome to grant
+`optional_host_permissions` for that domain list only — nothing else, and
+nothing standing until you ask for it. Turning it back off calls
+`chrome.permissions.remove()`, so nothing is left granted. Either way, a
+manual click on an Amedia page always clears it.
 
 **This is exactly why AmediAid isn't on the Chrome Web Store and never will
-be** — it names a specific publisher and bypasses its paywall automatically,
-which is a pattern the Store has removed extensions for before. GitHub is the
-only distribution channel, on purpose.
+be** — it names a specific publisher and offers to bypass its paywall
+automatically, which is a pattern the Store has removed extensions for
+before. GitHub is the only distribution channel, on purpose.
 
 ## Everywhere else — one click
 

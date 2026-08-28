@@ -6,9 +6,8 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   await syncAmediaContentScript();
 });
 chrome.runtime.onStartup.addListener(syncAmediaContentScript);
-chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === "sync" && "autoAmedia" in changes) syncAmediaContentScript();
-});
+chrome.permissions.onAdded.addListener(syncAmediaContentScript);
+chrome.permissions.onRemoved.addListener(syncAmediaContentScript);
 
 chrome.action.onClicked.addListener(async (tab) => {
   if (!tab.id || !/^https?:/.test(tab.url || "")) return;
@@ -39,28 +38,28 @@ chrome.runtime.onMessage.addListener((message, sender) => {
   pendingBadges.set(tabId, entry);
 });
 
-// (Re)registers or unregisters the auto-run Amedia content script to match the
-// autoAmedia setting. The host permission itself is static (manifest.json
-// host_permissions) and always granted - this only controls whether the
-// script actually runs on those sites.
+// (Re)registers or unregisters the auto-run Amedia content script to match
+// whether its optional host permission is currently granted. Off by default -
+// granting it requires the user to check the options-page box, which is the
+// user gesture Chrome requires for chrome.permissions.request() anyway.
 //
 // Queued through amediaSync rather than called directly: onInstalled,
-// onStartup and onChanged can all fire close together, and two overlapping
-// calls could each read a stale autoAmedia value and leave the registration
-// out of sync with the setting.
+// onStartup and onAdded/onRemoved can all fire close together, and two
+// overlapping calls could each read a stale permission state and leave the
+// registration out of sync with it.
 let amediaSync = Promise.resolve();
 const syncAmediaContentScript = () => (amediaSync = amediaSync.catch(() => {}).then(syncAmediaContentScriptNow));
 
 async function syncAmediaContentScriptNow() {
-  const { host_permissions: origins = [] } = chrome.runtime.getManifest();
+  const { optional_host_permissions: origins = [] } = chrome.runtime.getManifest();
   if (!origins.length) return;
-  const { autoAmedia = true } = await chrome.storage.sync.get({ autoAmedia: true });
+  const has = await chrome.permissions.contains({ origins });
   const existing = await chrome.scripting.getRegisteredContentScripts({ ids: [AMEDIA_SCRIPT_ID] });
-  if (autoAmedia && existing.length === 0) {
+  if (has && existing.length === 0) {
     await chrome.scripting.registerContentScripts([
       { id: AMEDIA_SCRIPT_ID, js: ["clearview.js"], matches: origins, runAt: "document_idle" },
     ]);
-  } else if (!autoAmedia && existing.length > 0) {
+  } else if (!has && existing.length > 0) {
     await chrome.scripting.unregisterContentScripts({ ids: [AMEDIA_SCRIPT_ID] });
   }
 }

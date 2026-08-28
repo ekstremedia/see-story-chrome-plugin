@@ -11,7 +11,6 @@
     unblur: true,
     unfade: true,
     unlockScroll: true,
-    autoAmedia: true,
     watchSeconds: 30,
     rules: [],
   };
@@ -57,7 +56,7 @@
     const css = [
       ruleSelectors.length ? `${ruleSelectors.join(",\n")} { display: none !important; }` : "",
       // Amedia's paywall prompt box - see amedia-domains.tsv for the CMS this targets.
-      settings.autoAmedia ? `#aid-overlay { display: none !important; }` : "",
+      `#aid-overlay { display: none !important; }`,
       settings.unblur
         ? `[${MARK}~="blur"] { filter: none !important; -webkit-filter: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }`
         : "",
@@ -96,10 +95,8 @@
   };
 
   const sweep = () => {
-    if (settings.autoAmedia) {
-      const overlay = document.getElementById("aid-overlay");
-      if (overlay && mark(overlay, "amedia")) changed++;
-    }
+    const overlay = document.getElementById("aid-overlay");
+    if (overlay && mark(overlay, "amedia")) changed++;
 
     for (const sel of ruleSelectors) {
       let matches;

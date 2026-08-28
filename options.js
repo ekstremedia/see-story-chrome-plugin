@@ -2,13 +2,12 @@ const DEFAULTS = {
   unblur: true,
   unfade: true,
   unlockScroll: true,
-  autoAmedia: true,
   watchSeconds: 30,
   rules: [],
 };
 
 const $ = (id) => document.getElementById(id);
-const TOGGLES = ["unblur", "unfade", "unlockScroll", "autoAmedia"];
+const TOGGLES = ["unblur", "unfade", "unlockScroll"];
 const rulesEl = $("rules");
 
 const readRules = () =>
@@ -49,6 +48,8 @@ const say = (message) => {
   setTimeout(() => ($("status").textContent = ""), 2500);
 };
 
+const AMEDIA_ORIGINS = chrome.runtime.getManifest().optional_host_permissions || [];
+
 const load = async () => {
   const settings = { ...DEFAULTS, ...(await chrome.storage.sync.get(DEFAULTS)) };
   for (const key of TOGGLES) $(key).checked = Boolean(settings[key]);
@@ -56,7 +57,24 @@ const load = async () => {
   rulesEl.replaceChildren();
   settings.rules.forEach(addRule);
   refreshEmpty();
+  $("autoAmedia").checked = AMEDIA_ORIGINS.length
+    ? await chrome.permissions.contains({ origins: AMEDIA_ORIGINS })
+    : false;
+  $("autoAmedia").disabled = AMEDIA_ORIGINS.length === 0;
 };
+
+$("autoAmedia").addEventListener("change", async (event) => {
+  const checkbox = event.target;
+  if (!AMEDIA_ORIGINS.length) return;
+  if (checkbox.checked) {
+    const granted = await chrome.permissions.request({ origins: AMEDIA_ORIGINS });
+    checkbox.checked = granted;
+    if (granted) say("Auto-apply on.");
+  } else {
+    await chrome.permissions.remove({ origins: AMEDIA_ORIGINS });
+    say("Auto-apply off.");
+  }
+});
 
 const save = async () => {
   const settings = {

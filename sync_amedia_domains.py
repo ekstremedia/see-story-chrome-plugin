@@ -1,4 +1,4 @@
-"""Regenerate manifest.json's host_permissions from amedia-domains.tsv.
+"""Regenerate manifest.json's optional_host_permissions from amedia-domains.tsv.
 
 amedia-domains.tsv is the source of truth for the Amedia auto-apply feature
 (see its header for what qualifies a domain). After editing that file:
@@ -27,17 +27,17 @@ def main():
     text = open("manifest.json", encoding="utf-8").read()
     array = "[\n" + "".join(f'    "{o}",\n' for o in origins)[:-2] + "\n  ]"
     new_text, n = re.subn(
-        r'"host_permissions":\s*\[[^\]]*\]',
-        f'"host_permissions": {array}',
+        r'"optional_host_permissions":\s*\[[^\]]*\]',
+        f'"optional_host_permissions": {array}',
         text,
         count=1,
     )
     if n != 1:
-        raise SystemExit('manifest.json has no "host_permissions" key to replace')
+        raise SystemExit('manifest.json has no "optional_host_permissions" key to replace')
 
     open("manifest.json", "w", encoding="utf-8").write(new_text)
     json.load(open("manifest.json"))  # confirm the result still parses
-    print(f"manifest.json: {len(domains)} host_permissions")
+    print(f"manifest.json: {len(domains)} optional_host_permissions")
 
 
 if __name__ == "__main__":

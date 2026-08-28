@@ -17,7 +17,7 @@
 
     <section>
       <h2>Amedia sites</h2>
-      <label class="row"><input type="checkbox" id="autoAmedia" /><span><strong>Auto-apply on known Amedia local-newspaper sites</strong><em>On by default. Un-blurs the article and removes the subscribe prompt the moment the page loads, no click needed. This extension has standing access to those sites' domains only (<code>host_permissions</code> in the manifest) — everywhere else stays click-only, zero standing access. Turning this off stops it from running, but the manifest still lists the domains until you edit it yourself.</em></span></label>
+      <label class="row"><input type="checkbox" id="autoAmedia" /><span><strong>Auto-apply on known Amedia local-newspaper sites</strong><em>Off by default. Un-blurs the article and removes the subscribe prompt the moment the page loads, no click needed. Turning this on asks Chrome to grant access to those sites' domains only — everywhere else stays click-only, zero standing access. Turning it back off calls <code>chrome.permissions.remove()</code>, so nothing is left granted. Either way, clicking the toolbar icon on an Amedia page always clears it too.</em></span></label>
     </section>
 
     <section>
