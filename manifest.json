@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "See Story",
-  "version": "1.0.0",
-  "description": "One click: remove the Amedia paywall overlay and un-blur the article text.",
-  "permissions": ["scripting", "activeTab"],
+  "name": "Clear View",
+  "version": "2.0.0",
+  "description": "One click to strip CSS blur, fade-out masks and scroll locks from a page, plus your own per-site element rules.",
+  "permissions": ["scripting", "activeTab", "storage"],
   "action": {
-    "default_title": "See Story - remove overlay & un-blur",
+    "default_title": "Clear View - un-blur this page",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
@@ -19,10 +19,14 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
   "commands": {
     "_execute_action": {
       "suggested_key": { "default": "Alt+Shift+S" },
-      "description": "Remove overlay & un-blur"
+      "description": "Clear the current page"
     }
   },
   "background": { "service_worker": "background.js" }
