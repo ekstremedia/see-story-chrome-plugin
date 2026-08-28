@@ -53,6 +53,17 @@
   // page is left with an empty slot. Kept in its own rule because :has() is
   // Chrome 105+, and one unparseable selector would otherwise take every ad
   // rule above down with it.
+  // "Hide ads on Amedia sites" says Amedia sites, and some of the selectors
+  // below are generic enough to hit unrelated UI - smart-banner especially is
+  // a name plenty of sites use. So scope them, reading the domain list off the
+  // manifest rather than keeping a second copy of it here.
+  const isAmediaHost = (() => {
+    const host = location.hostname.toLowerCase();
+    return (chrome.runtime.getManifest().optional_host_permissions || [])
+      .map((origin) => origin.replace(/^\*:\/\/\*\./, "").replace(/\/\*$/, "").toLowerCase())
+      .some((domain) => domain && (host === domain || host.endsWith("." + domain)));
+  })();
+
   const AD_SPONSORED_SELECTOR = [
     'optimus-element:has(a[href*="/vis/annonse/" i])',
     '.b-teaser-container:has(> a[href*="/vis/annonse/" i])',
@@ -126,8 +137,10 @@ html[${MARK}~="unlock"] {
       // Amedia's ad slots, off unless asked for. This only hides them: a
       // content script cannot stop the requests, which would take
       // declarativeNetRequest and a rule set. The ads still load.
-      settings.hideAds ? `${AD_SELECTOR} { display: none !important; }` : "",
-      settings.hideAds ? `${AD_SPONSORED_SELECTOR} { display: none !important; }` : "",
+      settings.hideAds && isAmediaHost ? `${AD_SELECTOR} { display: none !important; }` : "",
+      settings.hideAds && isAmediaHost
+        ? `${AD_SPONSORED_SELECTOR} { display: none !important; }`
+        : "",
       settings.unblur
         ? `[${MARK}~="blur"] { filter: none !important; -webkit-filter: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }`
         : "",
@@ -194,7 +207,7 @@ html[${MARK}~="unlock"] {
     // a page that never locked anything.
     if (consent.length) unlockPage();
 
-    if (settings.hideAds) {
+    if (settings.hideAds && isAmediaHost) {
       for (const el of document.querySelectorAll(AD_SELECTOR)) {
         if (mark(el, "ad")) changed++;
       }

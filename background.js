@@ -1,5 +1,6 @@
 const AMEDIA_SCRIPT_ID = "clear-view-amedia-auto";
 const pendingBadges = new Map(); // tabId -> { total, timer }
+const badgeTimers = new Map(); // tabId -> the timeout that clears its badge
 
 // (Re)registers or unregisters the auto-run Amedia content script to match
 // whether its optional host permission is currently granted. Off by default -
@@ -78,5 +79,15 @@ async function setBadge(tabId, changed) {
   } catch {
     return;
   }
-  setTimeout(() => chrome.action.setBadgeText({ tabId, text: "" }).catch(() => {}), 2500);
+  // A tab keeps only its latest pending clear: a second result landing inside
+  // the 2.5s window would otherwise be wiped by the first one's timer, leaving
+  // the toolbar with no count at all.
+  clearTimeout(badgeTimers.get(tabId));
+  badgeTimers.set(
+    tabId,
+    setTimeout(() => {
+      badgeTimers.delete(tabId);
+      chrome.action.setBadgeText({ tabId, text: "" }).catch(() => {});
+    }, 2500),
+  );
 }

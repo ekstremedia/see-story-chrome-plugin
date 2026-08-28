@@ -151,8 +151,8 @@ Chrome profile through Google if you have Chrome Sync turned on.
 
 ## Files
 
-```
-manifest.json          Manifest V3 - see host_permissions for the Amedia domain list
+```text
+manifest.json          Manifest V3 - see optional_host_permissions for the domain list
 background.js          Toolbar click -> inject into all frames -> set the badge.
                         Also (un)registers the auto Amedia content script.
 clearview.js            The passes above; runs in the page, reads your settings
